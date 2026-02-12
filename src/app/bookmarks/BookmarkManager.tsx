@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { addBookmark, deleteBookmark } from '@/app/actions';
 
+const BROADCAST_CHANNEL = 'smart-bookmark-sync';
+
 export type Bookmark = {
   id: string;
   url: string;
@@ -29,6 +31,24 @@ export function BookmarkManager({ initialBookmarks }: { initialBookmarks: Bookma
 
   const supabase = useMemo(() => createClient(), []);
 
+  // Sync across tabs in same browser
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+    const bc = new BroadcastChannel(BROADCAST_CHANNEL);
+    bc.onmessage = (e: MessageEvent<{ type: 'INSERT'; bookmark: Bookmark } | { type: 'DELETE'; id: string }>) => {
+      const msg = e.data;
+      if (msg.type === 'INSERT') {
+        setBookmarks((prev) => {
+          if (prev.some((b) => b.id === msg.bookmark.id)) return prev;
+          return [msg.bookmark, ...prev];
+        });
+      } else if (msg.type === 'DELETE') {
+        setBookmarks((prev) => prev.filter((b) => b.id !== msg.id));
+      }
+    };
+    return () => bc.close();
+  }, []);
+
   useEffect(() => {
     const channel = supabase
       .channel('bookmarks-realtime')
@@ -37,17 +57,30 @@ export function BookmarkManager({ initialBookmarks }: { initialBookmarks: Bookma
         { event: '*', schema: 'public', table: 'bookmarks' },
         (payload) => {
           if (payload.eventType === 'INSERT' && payload.new) {
-            setBookmarks((prev) => [toBookmark(payload.new as Record<string, unknown>), ...prev]);
+            const newRow = payload.new as Record<string, unknown>;
+            setBookmarks((prev) => {
+              const id = String(newRow.id);
+              if (prev.some((b) => b.id === id)) return prev;
+              return [toBookmark(newRow), ...prev];
+            });
+          }
+          if (payload.eventType === 'UPDATE' && payload.new) {
+            const updated = toBookmark(payload.new as Record<string, unknown>);
+            setBookmarks((prev) =>
+              prev.map((b) => (b.id === updated.id ? updated : b))
+            );
           }
           if (payload.eventType === 'DELETE' && payload.old) {
             const old = payload.old as Record<string, unknown>;
-            setBookmarks((prev) => prev.filter((b) => b.id !== old.id));
+            setBookmarks((prev) => prev.filter((b) => b.id !== String(old.id)));
           }
         }
       )
       .subscribe((status) => {
         if (status === 'CHANNEL_ERROR') {
-          console.error('[Realtime] Channel error – is the bookmarks table in the supabase_realtime publication?');
+          console.error(
+            '[Realtime] Channel error – ensure the bookmarks table is in the supabase_realtime publication (see README or run migration).'
+          );
         }
       });
 
@@ -69,6 +102,14 @@ export function BookmarkManager({ initialBookmarks }: { initialBookmarks: Bookma
       setError(result.error);
       return;
     }
+    if (result.bookmark) {
+      setBookmarks((prev) => [result.bookmark!, ...prev]);
+      if (typeof BroadcastChannel !== 'undefined') {
+        const bc = new BroadcastChannel(BROADCAST_CHANNEL);
+        bc.postMessage({ type: 'INSERT', bookmark: result.bookmark });
+        bc.close();
+      }
+    }
     setUrl('');
     setTitle('');
   }
@@ -76,7 +117,16 @@ export function BookmarkManager({ initialBookmarks }: { initialBookmarks: Bookma
   async function handleDelete(id: string) {
     setError('');
     const result = await deleteBookmark(id);
-    if (result.error) setError(result.error);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    setBookmarks((prev) => prev.filter((b) => b.id !== id));
+    if (typeof BroadcastChannel !== 'undefined') {
+      const bc = new BroadcastChannel(BROADCAST_CHANNEL);
+      bc.postMessage({ type: 'DELETE', id });
+      bc.close();
+    }
   }
 
   return (
@@ -101,7 +151,7 @@ export function BookmarkManager({ initialBookmarks }: { initialBookmarks: Bookma
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-amber-500 px-6 py-2.5 font-medium text-stone-900 hover:bg-amber-400 disabled:opacity-50 shadow-sm"
+          className="rounded-lg bg-amber-500 px-6 py-2.5 font-medium text-stone-900 hover:bg-amber-400 disabled:opacity-50 shadow-sm cursor-pointer"
         >
           {pending ? 'Adding…' : 'Add'}
         </button>

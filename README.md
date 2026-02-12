@@ -95,6 +95,3 @@ After deploy, use the **live Vercel URL** to sign in with your Google account an
 4. **Google OAuth redirect after deploy**  
    On Vercel, the redirect back from Google must go to the production URL. I set `NEXT_PUBLIC_SITE_URL` in Vercel and use it where needed; for the sign-in route I used `request.url`’s origin so the same code works in dev and production without hardcoding.
 
-## License
-
-MIT

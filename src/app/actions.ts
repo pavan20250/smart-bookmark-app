@@ -12,13 +12,19 @@ export async function addBookmark(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
-  const { error } = await supabase
+  const { data: row, error } = await supabase
     .from('bookmarks')
-    .insert({ user_id: user.id, url: url.trim(), title: title.trim() });
+    .insert({ user_id: user.id, url: url.trim(), title: title.trim() })
+    .select('id, url, title, created_at')
+    .single();
 
   if (error) return { error: error.message };
   revalidatePath('/bookmarks');
-  return {};
+  return {
+    bookmark: row
+      ? { id: String(row.id), url: row.url, title: row.title, created_at: String(row.created_at) }
+      : null,
+  };
 }
 
 export async function deleteBookmark(id: string) {
