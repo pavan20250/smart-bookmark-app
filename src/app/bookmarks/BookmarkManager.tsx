@@ -88,7 +88,7 @@ export function BookmarkManager({ initialBookmarks }: { initialBookmarks: Bookma
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           required
-          className="flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+          className="flex-1 rounded-lg border border-stone-300 bg-stone-100 px-4 py-2.5 text-stone-800 placeholder-stone-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 shadow-sm"
         />
         <input
           type="text"
@@ -96,40 +96,40 @@ export function BookmarkManager({ initialBookmarks }: { initialBookmarks: Bookma
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+          className="flex-1 rounded-lg border border-stone-300 bg-stone-100 px-4 py-2.5 text-stone-800 placeholder-stone-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 shadow-sm"
         />
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-amber-500 px-6 py-2.5 font-medium text-zinc-900 hover:bg-amber-400 disabled:opacity-50"
+          className="rounded-lg bg-amber-500 px-6 py-2.5 font-medium text-stone-900 hover:bg-amber-400 disabled:opacity-50 shadow-sm"
         >
           {pending ? 'Adding…' : 'Add'}
         </button>
       </form>
 
       {error && (
-        <p className="rounded-lg bg-red-500/10 px-4 py-2 text-sm text-red-400">
+        <p className="rounded-lg bg-red-100/80 px-4 py-2 text-sm text-red-700 border border-red-200">
           {error}
         </p>
       )}
 
       <ul className="space-y-2">
         {bookmarks.length === 0 && (
-          <li className="rounded-lg border border-dashed border-zinc-700 py-8 text-center text-zinc-500">
+          <li className="rounded-lg border border-dashed border-stone-300 bg-stone-100/80 py-8 text-center text-stone-500">
             No bookmarks yet. Add one above.
           </li>
         )}
         {bookmarks.map((b) => (
           <li
             key={b.id}
-            className="flex items-center justify-between gap-4 rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3"
+            className="flex items-center justify-between gap-4 rounded-lg border border-stone-300 bg-stone-100 px-4 py-3 shadow-sm hover:shadow transition-shadow"
           >
             <div className="min-w-0 flex-1">
               <a
                 href={b.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-medium text-amber-400 hover:underline truncate block"
+                className="font-medium text-amber-600 hover:text-amber-500 hover:underline truncate block"
               >
                 {b.title}
               </a>
@@ -137,7 +137,7 @@ export function BookmarkManager({ initialBookmarks }: { initialBookmarks: Bookma
                 href={b.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-zinc-500 truncate block"
+                className="text-sm text-stone-500 truncate block hover:text-stone-700"
               >
                 {b.url}
               </a>
@@ -145,7 +145,7 @@ export function BookmarkManager({ initialBookmarks }: { initialBookmarks: Bookma
             <button
               type="button"
               onClick={() => handleDelete(b.id)}
-              className="shrink-0 rounded px-3 py-1.5 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-red-400"
+              className="shrink-0 rounded px-3 py-1.5 text-sm text-stone-500 hover:bg-red-100/80 hover:text-red-700 transition-colors"
               aria-label={`Delete ${b.title}`}
             >
               Delete

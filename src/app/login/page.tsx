@@ -14,22 +14,22 @@ export default async function LoginPage({
   const { error: errorParam } = await searchParams;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-950 text-zinc-100 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 shadow-xl">
-        <h1 className="text-2xl font-semibold tracking-tight text-center mb-2">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-stone-200 text-stone-800 px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-stone-300 bg-stone-100 p-8 shadow-lg shadow-stone-300/40">
+        <h1 className="text-2xl font-semibold tracking-tight text-center mb-2 text-stone-800">
           Smart Bookmark
         </h1>
-        <p className="text-zinc-400 text-sm text-center mb-8">
+        <p className="text-stone-500 text-sm text-center mb-8">
           Sign in with Google to save and sync your bookmarks.
         </p>
         {errorParam && (
-          <p className="mb-6 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">
+          <p className="mb-6 rounded-lg bg-red-100/80 px-3 py-2 text-sm text-red-700 border border-red-200">
             {decodeURIComponent(errorParam)}
           </p>
         )}
         <a
           href="/auth/signin"
-          className="w-full flex items-center justify-center gap-3 rounded-xl bg-white text-zinc-900 font-medium py-3 px-4 hover:bg-zinc-100 transition"
+          className="w-full flex items-center justify-center gap-3 rounded-xl bg-stone-100 border border-stone-300 text-stone-800 font-medium py-3 px-4 hover:bg-stone-200 transition shadow-sm"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -51,13 +51,13 @@ export default async function LoginPage({
           </svg>
           Continue with Google
         </a>
-        <p className="mt-6 text-center text-zinc-500 text-xs">
+        <p className="mt-6 text-center text-stone-400 text-xs">
           No email/password — Google OAuth only.
         </p>
       </div>
       <Link
         href="/"
-        className="mt-6 text-zinc-500 hover:text-zinc-300 text-sm"
+        className="mt-6 text-stone-500 hover:text-stone-700 text-sm"
       >
         ← Back home
       </Link>
